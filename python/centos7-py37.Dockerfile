@@ -48,9 +48,5 @@ RUN set -ex \
     # # update pip
     && pip3 install --upgrade pip
 
-RUN date
-
-
-
 
 CMD [ "python3" ]
