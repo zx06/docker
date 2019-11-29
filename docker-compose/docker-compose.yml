@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  traefik:
+    image: traefik:v2.1.0-rc2
+    # container_name: "traefik"
+    command:
+      - --log.level=INFO
+      - --api.insecure=true
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+    ports:
+      - 80:80
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  jenkins:
+    image: jenkinsci/blueocean
+    # container_name: "jenkins"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jenkins.entrypoints=web
+      - traefik.http.routers.jenkins.rule=Host(`jenkins.dev.xz`)
+    ports:
+      - "8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - jenkins-data:/var/jenkins_home
+
+  portainer:
+    image: portainer/portainer
+    # container_name: "jenkins"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.portainer.entrypoints=web
+      - traefik.http.routers.portainer.rule=Host(`portainer.dev.xz`)
+    ports:
+      - "9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+volumes:
+  jenkins-data:
+  portainer_data:
